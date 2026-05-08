@@ -1,0 +1,227 @@
+{
+  "info": {
+    "name": "Ruty Shop API",
+    "_postman_id": "ruty-shop-api-collection",
+    "description": "כל הנתיבים של Ruty Shop API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "product_id",
+      "value": "PASTE-PRODUCT-ID-HERE",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/",
+          "host": ["{{base_url}}"],
+          "path": [""]
+        },
+        "description": "בדיקה שהשרת עולה ורץ"
+      }
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/",
+              "host": ["{{base_url}}"],
+              "path": ["products", ""]
+            },
+            "description": "כל המוצרים כולל תמונות"
+          }
+        },
+        {
+          "name": "Get Products - Filter by Season (winter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/?season=winter",
+              "host": ["{{base_url}}"],
+              "path": ["products", ""],
+              "query": [{ "key": "season", "value": "winter" }]
+            }
+          }
+        },
+        {
+          "name": "Get Products - Filter by Season (summer)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/?season=summer",
+              "host": ["{{base_url}}"],
+              "path": ["products", ""],
+              "query": [{ "key": "season", "value": "summer" }]
+            }
+          }
+        },
+        {
+          "name": "Get Products - Filter by Gender",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/?gender=גברים",
+              "host": ["{{base_url}}"],
+              "path": ["products", ""],
+              "query": [{ "key": "gender", "value": "גברים" }]
+            },
+            "description": "ערכים: גברים | נשים | ילדים | נערים | כללי"
+          }
+        },
+        {
+          "name": "Get Products - In Stock Only",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/?in_stock=true",
+              "host": ["{{base_url}}"],
+              "path": ["products", ""],
+              "query": [{ "key": "in_stock", "value": "true" }]
+            }
+          }
+        },
+        {
+          "name": "Get Products - Search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/?search=פולו",
+              "host": ["{{base_url}}"],
+              "path": ["products", ""],
+              "query": [{ "key": "search", "value": "פולו" }]
+            }
+          }
+        },
+        {
+          "name": "Get Products - Sort by price ascending",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/?sort_by=price&sort_asc=true",
+              "host": ["{{base_url}}"],
+              "path": ["products", ""],
+              "query": [
+                { "key": "sort_by", "value": "price" },
+                { "key": "sort_asc", "value": "true" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Products - Multiple Filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/?season=winter&gender=נשים&in_stock=true&sort_by=price&sort_asc=true",
+              "host": ["{{base_url}}"],
+              "path": ["products", ""],
+              "query": [
+                { "key": "season", "value": "winter" },
+                { "key": "gender", "value": "נשים" },
+                { "key": "in_stock", "value": "true" },
+                { "key": "sort_by", "value": "price" },
+                { "key": "sort_asc", "value": "true" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Single Product",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/{{product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["products", "{{product_id}}"]
+            },
+            "description": "מוצר בודד כולל מערך images"
+          }
+        },
+        {
+          "name": "Get Product Images",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/{{product_id}}/images",
+              "host": ["{{base_url}}"],
+              "path": ["products", "{{product_id}}", "images"]
+            },
+            "description": "כל תמונות המוצר לפי ID — מחזיר: id, cloudinary_url, sort_order"
+          }
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"מעיל חורף\",\n  \"description\": \"מעיל חם ונוח לחורף\",\n  \"price\": 250.00,\n  \"season\": \"winter\",\n  \"gender\": \"נשים\",\n  \"size\": \"M-XL\",\n  \"color\": \"שחור\",\n  \"brand\": \"Zara\",\n  \"in_stock\": true,\n  \"purchase_url\": \"https://store.flylinking.com/g/EXAMPLE\",\n  \"product_code\": \"NANCY A9999\",\n  \"facebook_url\": \"https://www.facebook.com/groups/metziot.motag/posts/123\",\n  \"telegram_url\": \"https://t.me/metziotmotag/999\",\n  \"source_message\": \"טקסט מקורי מווצאפ\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products/",
+              "host": ["{{base_url}}"],
+              "path": ["products", ""]
+            },
+            "description": "יצירת מוצר חדש"
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"מעיל חורף מעודכן\",\n  \"description\": \"תיאור מעודכן\",\n  \"price\": 220.00,\n  \"season\": \"winter\",\n  \"gender\": \"נשים\",\n  \"size\": \"L\",\n  \"color\": \"אפור\",\n  \"brand\": \"Zara\",\n  \"in_stock\": true,\n  \"purchase_url\": \"https://store.flylinking.com/g/EXAMPLE\",\n  \"product_code\": \"NANCY A9999\",\n  \"facebook_url\": null,\n  \"telegram_url\": null,\n  \"source_message\": \"עודכן ידנית\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products/{{product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["products", "{{product_id}}"]
+            },
+            "description": "עדכון מוצר קיים לפי ID"
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/{{product_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["products", "{{product_id}}"]
+            },
+            "description": "מחיקת מוצר + תמונותיו (cascade)"
+          }
+        }
+      ]
+    }
+  ]
+}
