@@ -1,7 +1,8 @@
 .env
 .mcp.json
-.claude/settings.local.json
+.claude/
 __pycache__/
 *.py[cod]
 .venv/
 venv/
+WhatsApp Chat - קניות/
