@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
-from app.routers import products
+from app.routers import products, telegram_bot
 import logging
 
 logger = logging.getLogger(__name__)
@@ -28,6 +28,7 @@ app.add_middleware(
 )
 
 app.include_router(products.router)
+app.include_router(telegram_bot.router)
 
 
 @app.get("/")

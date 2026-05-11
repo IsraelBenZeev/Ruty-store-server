@@ -18,7 +18,7 @@ class ProductBase(BaseModel):
     price: Decimal
     season: str
     gender: str
-    size: Optional[str] = None
+    size: Optional[List[str]] = None
     color: Optional[str] = None
     brand: Optional[str] = None
     in_stock: bool = True
