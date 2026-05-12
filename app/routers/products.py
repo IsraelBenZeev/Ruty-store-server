@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from sqlalchemy import or_, distinct
 from typing import Optional, List
 from app.database import get_db
 from app.models import Product, ProductImage
@@ -9,10 +9,33 @@ from app.schemas import ProductCreate, ProductOut, ProductImageOut
 router = APIRouter(prefix="/products", tags=["products"])
 
 
+@router.get("/brands", response_model=list[str])
+def get_brands(db: Session = Depends(get_db)):
+    rows = (
+        db.query(distinct(Product.brand))
+        .filter(Product.brand.isnot(None), Product.brand != "")
+        .order_by(Product.brand)
+        .all()
+    )
+    return [r[0] for r in rows]
+
+
+@router.get("/seasons", response_model=list[str])
+def get_seasons(db: Session = Depends(get_db)):
+    rows = (
+        db.query(distinct(Product.season))
+        .filter(Product.season.isnot(None), Product.season != "")
+        .order_by(Product.season)
+        .all()
+    )
+    return [r[0] for r in rows]
+
+
 @router.get("/", response_model=list[ProductOut])
 def get_products(
     season: Optional[str] = Query(None),
     gender: Optional[str] = Query(None),
+    brand: Optional[str] = Query(None),
     in_stock: Optional[bool] = Query(None),
     search: Optional[str] = Query(None),
     sort_by: str = Query("created_at"),
@@ -26,6 +49,9 @@ def get_products(
 
     if gender and gender != "unisex":
         q = q.filter(or_(Product.gender == gender, Product.gender == "unisex"))
+
+    if brand:
+        q = q.filter(Product.brand == brand)
 
     if in_stock is not None:
         q = q.filter(Product.in_stock == in_stock)

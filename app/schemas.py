@@ -22,6 +22,9 @@ class ProductBase(BaseModel):
     color: Optional[str] = None
     brand: Optional[str] = None
     in_stock: bool = True
+    delivery_time: Optional[str] = None
+    allow_returns: Optional[bool] = None
+    sms_required: Optional[bool] = None
     source_message: Optional[str] = None
     purchase_url: Optional[str] = None
     product_code: Optional[str] = None
