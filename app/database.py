@@ -1,9 +1,18 @@
-from sqlalchemy import create_engine, event
+import sys
+import os
+from app import neon_dbapi
+
+# Patch psycopg2 with our HTTP-based DBAPI before SQLAlchemy loads the dialect.
+# Avoids binary psycopg2 dependency in serverless environments (Vercel).
+if "psycopg2" not in sys.modules:
+    sys.modules["psycopg2"] = neon_dbapi
+    sys.modules["psycopg2.extras"] = neon_dbapi.extras
+    sys.modules["psycopg2.extensions"] = neon_dbapi.extensions
+
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from sqlalchemy.pool import StaticPool
 from dotenv import load_dotenv
-import os
-from app import neon_dbapi
 
 load_dotenv()
 
