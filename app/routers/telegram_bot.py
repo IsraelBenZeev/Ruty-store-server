@@ -29,11 +29,18 @@ chat_states: dict[int, str] = {}
 # chat_id -> {"text": str, "timestamp": int | None}
 pending_texts: dict[int, dict] = {}
 
+# chat_id -> list[str] (accumulated file_ids across multiple albums)
+pending_images: dict[int, list[str]] = {}
+
 # media_group_id -> {"chat_id": int, "file_ids": list[str], "task": asyncio.Task | None}
 pending_albums: dict[str, dict] = {}
 
 _START_BUTTON = {
     "inline_keyboard": [[{"text": "📦 התחל העלאת מוצר", "callback_data": "start_upload"}]]
+}
+
+_DONE_BUTTON = {
+    "inline_keyboard": [[{"text": "✅ סיימתי להעלות תמונות", "callback_data": "done_upload"}]]
 }
 
 
@@ -77,7 +84,20 @@ async def _finalize_album(media_group_id: str) -> None:
     album = pending_albums.pop(media_group_id, None)
     if not album:
         return
-    await _process_photos(album["chat_id"], album["file_ids"])
+
+    chat_id = album["chat_id"]
+    file_ids = album["file_ids"]
+
+    if chat_id not in pending_images:
+        pending_images[chat_id] = []
+    pending_images[chat_id].extend(file_ids)
+
+    total = len(pending_images[chat_id])
+    await _send_message(
+        chat_id,
+        f"📸 נוספו {len(file_ids)} תמונות (סה\"כ {total})\nשלח עוד תמונות או לחץ סיום:",
+        _DONE_BUTTON,
+    )
 
 
 async def _process_photos(chat_id: int, file_ids: list[str]) -> None:
@@ -179,9 +199,17 @@ async def _handle_update(update: dict) -> None:
         cq = update["callback_query"]
         chat_id = cq["message"]["chat"]["id"]
         await _answer_callback(cq["id"])
+
         if cq.get("data") == "start_upload":
             chat_states[chat_id] = "waiting_text"
             await _send_message(chat_id, "📝 שלח את טקסט המוצר")
+
+        elif cq.get("data") == "done_upload":
+            file_ids = pending_images.pop(chat_id, [])
+            if not file_ids:
+                await _send_message(chat_id, "❌ לא נשלחו תמונות עדיין. שלח לפחות תמונה אחת.")
+                return
+            await _process_photos(chat_id, file_ids)
         return
 
     message = update.get("message", {})
@@ -208,10 +236,10 @@ async def _handle_update(update: dict) -> None:
             return
         pending_texts[chat_id] = {"text": text, "timestamp": msg_date}
         chat_states[chat_id] = "waiting_images"
-        await _send_message(chat_id, "📸 מעולה! עכשיו שלח את תמונות המוצר (אפשר אלבום של עד 10 תמונות)")
+        await _send_message(chat_id, "📸 מעולה! עכשיו שלח את תמונות המוצר (אפשר כמה אלבומים)")
         return
 
-    # Step 2: waiting for images
+    # Step 2: waiting for images — accumulate until "done_upload" is pressed
     if state == "waiting_images":
         if not photos:
             await _send_message(
@@ -238,7 +266,16 @@ async def _handle_update(update: dict) -> None:
                 _finalize_album(media_group_id)
             )
         else:
-            await _process_photos(chat_id, [file_id])
+            # Single photo — add directly to accumulated list
+            if chat_id not in pending_images:
+                pending_images[chat_id] = []
+            pending_images[chat_id].append(file_id)
+            total = len(pending_images[chat_id])
+            await _send_message(
+                chat_id,
+                f"📸 נוספה תמונה (סה\"כ {total})\nשלח עוד תמונות או לחץ סיום:",
+                _DONE_BUTTON,
+            )
 
 
 @router.post("/telegram")
